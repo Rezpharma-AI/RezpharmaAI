@@ -1,0 +1,6 @@
+ImageFile,PatientID,Biomarker,Score,GROUP
+tissue_01.jpg,T001,HER2,Negative,0
+tissue_02.jpg,T002,HER2,Strong (3+),1
+tissue_03.jpg,T003,Ki-67,Low (10%),0
+tissue_04.jpg,T004,Ki-67,High (85%),1
+tissue_05.jpg,T005,PD-L1,Positive,1

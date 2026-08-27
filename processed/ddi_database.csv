@@ -1,0 +1,11 @@
+drug1,drug2,severity,mechanism,management,onset
+Warfarin,Amiodarone,Major,"Amiodarone inhibits CYP2C9 metabolism of warfarin, increasing INR.",Reduce warfarin dose by 30-50%. Monitor INR closely.,Delayed
+Warfarin,Aspirin,Major,Pharmacodynamic synergism increases bleeding risk.,"Avoid combination if possible. If required, use lowest aspirin dose and monitor bleeding.",Rapid
+Simvastatin,Amlodipine,Moderate,Amlodipine may increase simvastatin exposure via CYP3A4 inhibition.,Limit simvastatin to 20 mg/day when used with amlodipine.,Delayed
+Digoxin,Furosemide,Major,Furosemide-induced hypokalemia increases digoxin toxicity risk.,"Monitor potassium, magnesium, and digoxin level. Replace electrolytes if needed.",Delayed
+Metformin,Contrast Dye,Contraindicated,Contrast-induced kidney injury may cause metformin accumulation and lactic acidosis.,Hold metformin before contrast and for 48 hours after. Restart only if renal function is stable.,Delayed
+Ondansetron,Amiodarone,Major,Additive QTc prolongation risk.,Avoid if possible. Monitor ECG and electrolytes if combination is necessary.,Rapid
+Lisinopril,Spironolactone,Major,Combined RAAS blockade increases hyperkalemia risk.,Monitor potassium and renal function closely. Avoid in severe renal impairment.,Delayed
+Ciprofloxacin,Tizanidine,Contraindicated,"Ciprofloxacin strongly inhibits CYP1A2, raising tizanidine levels.",Do not use together. Risk of severe hypotension and sedation.,Rapid
+Digoxin,Amiodarone,Major,Amiodarone increases digoxin concentration.,Reduce digoxin dose by approximately 50% and monitor digoxin level.,Delayed
+Morphine,Midazolam,Major,Additive CNS depression and respiratory depression.,Use only with monitoring. Reduce doses and monitor respiratory status.,Rapid

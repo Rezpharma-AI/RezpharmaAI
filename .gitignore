@@ -1,0 +1,24 @@
+# ==========================================
+# IGNORE MASSIVE DATA & DATABASES
+# ==========================================
+data/raw/
+data/cdss.db
+data/processed/
+*.xml
+*.zip
+
+# ==========================================
+# PYTHON & ENVIRONMENTS
+# ==========================================
+__pycache__/
+*.py[cod]
+venv/
+cdss_env/
+.venv/
+
+# ==========================================
+# STREAMLIT & OS
+# ==========================================
+.streamlit/
+.DS_Store
+Thumbs.db

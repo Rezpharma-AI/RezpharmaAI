@@ -1,0 +1,8 @@
+drug,vd_l_per_kg,renal_fraction,half_life_h,tdm_target,metabolism,protein_binding,note
+Vancomycin,0.7,0.9,6.0,AUC/MIC 400-600 or trough-based monitoring per protocol,Renal elimination,30-55%,Adjust dose or interval according to renal function and TDM.
+Gentamicin,0.25,0.95,2.5,Peak/trough or extended-interval nomogram,Renal elimination,<10%,High nephrotoxicity and ototoxicity risk. Monitor levels.
+Warfarin,0.14,0.0,40.0,INR usually 2.0-3.0 depending on indication,"CYP2C9, CYP3A4, CYP1A2",99%,Highly protein bound and many interactions.
+Phenytoin,0.7,0.05,22.0,Total 10-20 mcg/mL; free 1-2 mcg/mL,"CYP2C9, CYP2C19",90%,Correct total phenytoin for low albumin or renal failure.
+Meropenem,0.3,0.8,1.0,Time above MIC; consider extended infusion,Renal elimination,2%,Adjust interval in renal impairment.
+Digoxin,7.0,0.7,36.0,Usually 0.5-0.9 ng/mL for heart failure,Renal elimination,25%,"Narrow therapeutic index. Monitor K+, Mg++, renal function."
+Levetiracetam,0.5,0.66,7.0,Context-dependent; often 10-40 mcg/mL,Renal elimination,<10%,Adjust dose in renal impairment.
