@@ -305,7 +305,75 @@ def generate_radiology_image():
         img = img.filter(ImageFilter.GaussianBlur(radius=4))
         img.save(path)
 
+# ============================================================
+# CLOUD AUTO-BUILDER (Fetches real NLM data for the web demo)
+# ============================================================
+def build_cloud_database():
+    """Fetches lightweight NLM data for the Streamlit Cloud web demo."""
+    import requests
+    import sqlite3
+    import time
+    
+    db_path = DATA_DIR / "cdss.db"
+    
+    # If a massive local database already exists, skip this (for local users)
+    if db_path.exists() and db_path.stat().st_size > 500000:
+        return
+        
+    print("☁️ Cloud Environment Detected. Building lightweight NLM database...")
+    
+    acute_drugs = ["warfarin", "aspirin", "amiodarone", "digoxin", "furosemide", 
+                   "simvastatin", "lisinopril", "metformin", "ondansetron", "ciprofloxacin"]
+    
+    rxcuis, mapping = [], {}
+    for drug in acute_drugs:
+        try:
+            r = requests.get("https://rxnav.nlm.nih.gov/REST/rxcui.json", params={"name": drug, "search": 2}, timeout=5)
+            ids = r.json().get("idGroup", {}).get("rxnormId")
+            if ids:
+                rxcuis.append(ids[0])
+                mapping[ids[0]] = drug.title()
+        except: pass
+        time.sleep(0.1)
+        
+    if not rxcuis: return
+    
+    try:
+        r = requests.get(f"https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis={'+'.join(rxcuis)}", timeout=10)
+        data = r.json()
+    except: return
 
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS ddi_rules (drug1 TEXT, drug2 TEXT, severity TEXT, mechanism TEXT, management TEXT, onset TEXT)")
+    
+    groups = data.get("interactionTypeGroup", [])
+    if isinstance(groups, dict): groups = [groups]
+    
+    for group in groups:
+        types = group.get("interactionType", [])
+        if isinstance(types, dict): types = [types]
+        for itype in types:
+            pairs = itype.get("interactionPair", [])
+            if isinstance(pairs, dict): pairs = [pairs]
+            for pair in pairs:
+                concepts = pair.get("interactionConcept", [])
+                if len(concepts) < 2: continue
+                d1, d2 = concepts[0].get("minConceptItem", {}).get("rxcui"), concepts[1].get("minConceptItem", {}).get("rxcui")
+                if d1 in mapping and d2 in mapping:
+                    sev = pair.get("severity", "N")
+                    sev_map = {"4": "CONTRAINDICATED", "3": "MAJOR", "2": "MODERATE", "1": "MINOR"}
+                    sev_text = sev_map.get(str(sev), "MODERATE")
+                    desc = pair.get("description", "NLM DDI")
+                    cur.execute("INSERT INTO ddi_rules VALUES (?, ?, ?, ?, ?, ?)", 
+                                (mapping[d1], mapping[d2], sev_text, f"NLM DDI: {desc}", "Consult pharmacist.", "Unknown"))
+    conn.commit()
+    conn.close()
+    print("✅ Cloud NLM database built!")
+
+# Call the generators
+generate_all_data()
+build_cloud_database() # <--- ADD THIS LINE
 def generate_all_data():
     ensure_dirs()
 

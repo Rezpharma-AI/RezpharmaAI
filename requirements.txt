@@ -7,4 +7,3 @@ Pillow
 torch
 scikit-learn
 requests
-lxml
