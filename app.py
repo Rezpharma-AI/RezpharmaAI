@@ -306,21 +306,28 @@ def generate_radiology_image():
         img.save(path)
 
 # ============================================================
-# CLOUD AUTO-BUILDER (Fetches real NLM data for the web demo)
+# CLOUD AUTO-BUILDER (V2 - Bulletproof)
 # ============================================================
 def build_cloud_database():
-    """Fetches lightweight NLM data for the Streamlit Cloud web demo."""
     import requests
     import sqlite3
     import time
     
     db_path = DATA_DIR / "cdss.db"
     
-    # If a massive local database already exists, skip this (for local users)
-    if db_path.exists() and db_path.stat().st_size > 500000:
-        return
-        
-    print("☁️ Cloud Environment Detected. Building lightweight NLM database...")
+    # If it already exists and has data, skip
+    if db_path.exists():
+        try:
+            conn = sqlite3.connect(db_path)
+            count = conn.execute("SELECT COUNT(*) FROM ddi_rules").fetchone()[0]
+            conn.close()
+            if count > 10:
+                st.sidebar.success(f"✅ Cloud DB Active ({count} rules)")
+                return
+        except:
+            pass
+
+st.sidebar.success("🚀 v5.1 - Bulletproof Cloud Builder ACTIVE!")
     
     acute_drugs = ["warfarin", "aspirin", "amiodarone", "digoxin", "furosemide", 
                    "simvastatin", "lisinopril", "metformin", "ondansetron", "ciprofloxacin"]
@@ -333,73 +340,60 @@ def build_cloud_database():
             if ids:
                 rxcuis.append(ids[0])
                 mapping[ids[0]] = drug.title()
-        except: pass
-        time.sleep(0.1)
+        except Exception as e:
+            st.sidebar.warning(f"API Error for {drug}: {str(e)[:50]}")
+        time.sleep(0.2)
         
-    if not rxcuis: return
-    
+    if not rxcuis:
+        st.sidebar.error("❌ Could not reach NLM API.")
+        return
+        
     try:
-        r = requests.get(f"https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis={'+'.join(rxcuis)}", timeout=10)
+        url = f"https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis={'+'.join(rxcuis)}"
+        r = requests.get(url, timeout=15)
         data = r.json()
-    except: return
+    except Exception as e:
+        st.sidebar.error(f"❌ API Fetch Failed: {str(e)[:100]}")
+        return
 
-    conn = sqlite3.connect(db_path)
-    cur = conn.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS ddi_rules (drug1 TEXT, drug2 TEXT, severity TEXT, mechanism TEXT, management TEXT, onset TEXT)")
-    
-    groups = data.get("interactionTypeGroup", [])
-    if isinstance(groups, dict): groups = [groups]
-    
-    for group in groups:
-        types = group.get("interactionType", [])
-        if isinstance(types, dict): types = [types]
-        for itype in types:
-            pairs = itype.get("interactionPair", [])
-            if isinstance(pairs, dict): pairs = [pairs]
-            for pair in pairs:
-                concepts = pair.get("interactionConcept", [])
-                if len(concepts) < 2: continue
-                d1, d2 = concepts[0].get("minConceptItem", {}).get("rxcui"), concepts[1].get("minConceptItem", {}).get("rxcui")
-                if d1 in mapping and d2 in mapping:
-                    sev = pair.get("severity", "N")
-                    sev_map = {"4": "CONTRAINDICATED", "3": "MAJOR", "2": "MODERATE", "1": "MINOR"}
-                    sev_text = sev_map.get(str(sev), "MODERATE")
-                    desc = pair.get("description", "NLM DDI")
-                    cur.execute("INSERT INTO ddi_rules VALUES (?, ?, ?, ?, ?, ?)", 
-                                (mapping[d1], mapping[d2], sev_text, f"NLM DDI: {desc}", "Consult pharmacist.", "Unknown"))
-    conn.commit()
-    conn.close()
-    print("✅ Cloud NLM database built!")
+    try:
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS ddi_rules (drug1 TEXT, drug2 TEXT, severity TEXT, mechanism TEXT, management TEXT, onset TEXT)")
+        cur.execute("DELETE FROM ddi_rules WHERE mechanism LIKE '%NLM DDI%'")
+        
+        count = 0
+        groups = data.get("interactionTypeGroup", [])
+        if isinstance(groups, dict): groups = [groups]
+        
+        for group in groups:
+            types = group.get("interactionType", [])
+            if isinstance(types, dict): types = [types]
+            for itype in types:
+                pairs = itype.get("interactionPair", [])
+                if isinstance(pairs, dict): pairs = [pairs]
+                for pair in pairs:
+                    concepts = pair.get("interactionConcept", [])
+                    if len(concepts) < 2: continue
+                    d1 = concepts[0].get("minConceptItem", {}).get("rxcui")
+                    d2 = concepts[1].get("minConceptItem", {}).get("rxcui")
+                    if d1 in mapping and d2 in mapping:
+                        sev = pair.get("severity", "N")
+                        sev_map = {"4": "CONTRAINDICATED", "3": "MAJOR", "2": "MODERATE", "1": "MINOR"}
+                        sev_text = sev_map.get(str(sev), "MODERATE")
+                        desc = pair.get("description", "NLM DDI")
+                        cur.execute("INSERT INTO ddi_rules VALUES (?, ?, ?, ?, ?, ?)", 
+                                    (mapping[d1], mapping[d2], sev_text, f"NLM DDI: {desc}", "Consult pharmacist.", "Unknown"))
+                        count += 1
+        conn.commit()
+        conn.close()
+        st.sidebar.success(f"✅ Built Cloud DB! ({count} NLM rules loaded)")
+    except Exception as e:
+        st.sidebar.error(f"❌ DB Write Failed: {str(e)[:100]}")
 
-# Call the generators
+# Call them at the bottom of the file
 generate_all_data()
-build_cloud_database() # <--- ADD THIS LINE
-def generate_all_data():
-    ensure_dirs()
-
-    ddi_path = PROCESSED_DIR / "ddi_database.csv"
-    if not ddi_path.exists():
-        make_ddi_db().to_csv(ddi_path, index=False)
-
-    pk_path = PROCESSED_DIR / "pk_database.csv"
-    if not pk_path.exists():
-        make_pk_db().to_csv(pk_path, index=False)
-
-    serum_path = DATA_DIR / "serum.csv"
-    if not serum_path.exists():
-        make_serum_db().to_csv(serum_path, index=False)
-
-    tissue_path = DATA_DIR / "tissue_metadata.csv"
-    if not tissue_path.exists():
-        make_tissue_db().to_csv(tissue_path, index=False)
-
-    generate_tissue_images()
-    generate_radiology_image()
-
-
-generate_all_data()
-
-
+build_cloud_database()
 # ============================================================
 # AI MODEL
 # ============================================================
@@ -482,7 +476,7 @@ st.markdown(
 
 st.sidebar.title("🏥 RezpharmaCDSS")
 st.sidebar.markdown("---")
-st.sidebar.info("v4.1 - Clean Basic Structure")
+   st.sidebar.success("🚀 v5.0 - NLM Cloud Auto-Builder ACTIVE!")
 st.sidebar.warning("⚠️ Research prototype only. Not for direct clinical use.")
 
 st.title("🏥 Rezpharma Clinical Decision Support System")
