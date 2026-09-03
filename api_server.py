@@ -1,3 +1,23 @@
+import os
+import urllib.request
+import zipfile
+
+# --- CLOUD DATABASE BOOTSTRAP ---
+DB_DIR = "database"
+DB_PATH = os.path.join(DB_DIR, "rezpharma.db")
+DB_URL = os.getenv("DB_DOWNLOAD_URL")
+
+if DB_URL and not os.path.exists(DB_PATH):
+    print("⚠️ Database not found. Downloading from cloud storage...")
+    os.makedirs(DB_DIR, exist_ok=True)
+    zip_path = os.path.join(DB_DIR, "rezpharma.zip")
+    urllib.request.urlretrieve(DB_URL, zip_path)
+    print("📦 Extracting database...")
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(DB_DIR)
+    os.remove(zip_path)
+    print("✅ Database ready.")
+# --------------------------------
 import sys, os
 sys.path.insert(0, '.')
 
