@@ -1,0 +1,11 @@
+rezpharma_env/
+__pycache__/
+*.pyc
+.git/
+.ipynb_checkpoints/
+data/raw/
+data/processed/
+.pytest_cache/
+htmlcov/
+notebooks/
+*.db

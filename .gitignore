@@ -1,24 +1,15 @@
-# ==========================================
-# IGNORE MASSIVE DATA & DATABASES
-# ==========================================
-data/raw/
-data/cdss.db
-data/processed/
-*.xml
-*.zip
-
-# ==========================================
-# PYTHON & ENVIRONMENTS
-# ==========================================
+rezpharma_env/
 __pycache__/
 *.py[cod]
-venv/
-cdss_env/
-.venv/
-
-# ==========================================
-# STREAMLIT & OS
-# ==========================================
-.streamlit/
-.DS_Store
-Thumbs.db
+.ipynb_checkpoints/
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+*.db
+.env
+htmlcov/
+.coverage
+database/*.db 
+__pycache__/ 
+.env 

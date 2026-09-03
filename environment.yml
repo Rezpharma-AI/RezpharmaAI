@@ -1,0 +1,34 @@
+name: rezpharma_ai_enterprise
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+  - python=3.10
+  # Deep Learning & GPU Support
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=11.8  # <-- DELETE THIS LINE if you DO NOT have an NVIDIA GPU
+  # Cheminformatics & Bioinformatics
+  - rdkit
+  - deepchem
+  # Data Science & ML
+  - scikit-learn
+  - pandas
+  - numpy
+  - matplotlib
+  - jupyterlab
+  - pip
+  - pip:
+    # NLP & Clinical Text
+    - transformers
+    - spacy
+    - scispacy
+    # Advanced ML & Explainability
+    - xgboost
+    - shap
+    # Graph Neural Networks
+    - torch-geometric
+    # UI for your CDSS
+    - streamlit

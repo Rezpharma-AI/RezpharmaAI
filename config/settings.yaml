@@ -1,0 +1,15 @@
+system:
+  name: RezpharmaCDSS
+  version: 1.0.0
+advisor:
+  alert_budget: 3
+  default_prior_harm: 0.05
+m2_pkpd:
+  target_attainment_prob: 0.90
+  toxicity_ceiling_prob: 0.10
+  particle_filter_particles: 1000
+m3_lab:
+  rcv_z_score: 2.77
+  kinetic_gfr_particles: 1000
+monitoring:
+  cusum_threshold: 5.0
