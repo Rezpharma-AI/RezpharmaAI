@@ -53,7 +53,7 @@ processed/
 *.db
 *.log
 
-# Stray artifacts from crashed scripts
+# Stray artifacts - escaped for safety
 0
 0.2
 0.8.0
@@ -87,19 +87,8 @@ processed/
 6.5.0
 20.0
 77.0.3
-500)
 2025.10.22
 Dict
-Tuple[float
-float
-np.ndarray
-pandas)
-jupyterlab)
-spacy)
-torch)
-torch-geometric)
-transformers)
-bin_edges[i])
 cd
 docker
 python
